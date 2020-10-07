@@ -1,0 +1,66 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: ''
+Resources:
+  S3SharedBucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      LoggingConfiguration: {}
+      AccessControl: LogDeliveryWrite
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+  ConfigRule19:
+    Type: 'AWS::Config::ConfigRule'
+    Properties:
+      ConfigRuleName: restricted-ssh
+      Description: >-
+        A Config rule that checks whether security groups in use do not allow
+        restricted incoming SSH traffic. This rule applies only to IPv4.
+      Scope:
+        ComplianceResourceTypes:
+          - 'AWS::EC2::SecurityGroup'
+      Source:
+        Owner: AWS
+        SourceIdentifier: INCOMING_SSH_DISABLED
+  ConfigRule20:
+    Type: 'AWS::Config::ConfigRule'
+    Properties:
+      ConfigRuleName: restricted-common-ports
+      Description: >-
+        A Config rule that checks whether security groups in use do not allow
+        restricted incoming TCP traffic to the specified ports. This rule
+        applies only to IPv4.
+      Scope:
+        ComplianceResourceTypes:
+          - 'AWS::EC2::SecurityGroup'
+      InputParameters:
+        blockedPort1: '20'
+        blockedPort2: '21'
+        blockedPort3: '3389'
+        blockedPort4: '3306'
+        blockedPort5: '4333'
+      Source:
+        Owner: AWS
+        SourceIdentifier: RESTRICTED_INCOMING_TRAFFIC
+  ConfigRule21:
+    Type: 'AWS::Config::ConfigRule'
+    Properties:
+      ConfigRuleName: vpc-default-security-group-closed
+      Description: >-
+        A config rule that checks that the default security group of any Amazon
+        Virtual Private Cloud (VPC) does not allow inbound or outbound traffic.
+        The rule returns NOT_APPLICABLE if the security group is not default.
+        The rule is NON_COMPLIANT if the defau...
+      Scope:
+        ComplianceResourceTypes:
+          - 'AWS::EC2::SecurityGroup'
+      Source:
+        Owner: AWS
+        SourceIdentifier: VPC_DEFAULT_SECURITY_GROUP_CLOSED
+Parameters: {}
+Metadata: {}
+Conditions: {}
